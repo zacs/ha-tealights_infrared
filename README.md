@@ -1,5 +1,8 @@
 # Tea Lights Infrared
 
+[![Validate](https://github.com/zacs/ha-tealights_infrared/actions/workflows/validate.yaml/badge.svg)](https://github.com/zacs/ha-tealights_infrared/actions/workflows/validate.yaml)
+[![hacs](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+
 A Home Assistant custom component for controlling IR tea light candles via the [Infrared](https://www.home-assistant.io/integrations/infrared/) platform.
 
 ## Overview
@@ -8,7 +11,7 @@ This integration sends infrared on/off commands to battery-powered IR tea light 
 
 ## Requirements
 
-- Home Assistant with the `infrared` platform available (2025.x+)
+- Home Assistant 2026.6 or later (for the `infrared` platform and its `InfraredEmitterConsumerEntity` API)
 - An infrared transmitter integration registered as an IR emitter entity (e.g., a Broadlink, ESPHome, or other IR blaster with infrared platform support)
 
 ## Entities
