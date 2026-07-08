@@ -7,10 +7,10 @@
     "step": {
       "user": {
         "data": {
-          "infrared_entity_id": "Infrared transmitter"
+          "infrared_emitter_entity_id": "Infrared transmitter"
         },
         "data_description": {
-          "infrared_entity_id": "The infrared transmitter entity to use for controlling the tea lights."
+          "infrared_emitter_entity_id": "The infrared transmitter entity to use for controlling the tea lights."
         },
         "description": "Select the infrared transmitter entity to use for controlling your IR tea light candles.",
         "title": "Set up Tea Lights IR"

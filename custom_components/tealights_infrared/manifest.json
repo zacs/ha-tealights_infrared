@@ -1,11 +1,11 @@
 {
   "domain": "tealights_infrared",
   "name": "Tea Lights Infrared",
-  "codeowners": [],
+  "codeowners": ["@zacs"],
   "config_flow": true,
   "dependencies": ["infrared"],
   "documentation": "https://github.com/zacs/ha-tealights_infrared",
   "integration_type": "device",
   "iot_class": "assumed_state",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

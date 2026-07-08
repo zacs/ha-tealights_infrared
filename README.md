@@ -21,7 +21,9 @@ This integration sends infrared on/off commands to battery-powered IR tea light 
 
 ## State tracking
 
-IR is a one-way protocol with no feedback channel. The light entity uses **assumed state** -- it tracks what it last sent, not what the tea lights are actually doing. If a command fails to reach the tea lights (out of range, blocked, etc.), the HA state will be wrong. The button entities are stateless.
+IR is a one-way protocol with no feedback channel. The light entity uses **assumed state** -- it tracks what it last sent (restored across restarts), not what the tea lights are actually doing. If a command fails to reach the tea lights (out of range, blocked, etc.), the HA state will be wrong. Because state is assumed, the frontend shows discrete on/off controls rather than a single toggle. The button entities are stateless.
+
+The entity is built on the `InfraredEmitterConsumerEntity` base class, so it is automatically marked unavailable when the underlying infrared transmitter is unavailable.
 
 ## Installation
 
@@ -42,3 +44,5 @@ Copy the `custom_components/tealights_infrared` directory into your Home Assista
 ## IR codes
 
 The bundled IR codes were captured from a set of generic battery-powered IR tea light candles. The protocol uses pulse-width modulation at 38kHz with ~850us/~1700us timing. If your tea lights use different codes, you will need to modify `commands.py`.
+
+On and off are discrete codes (not a single toggle), so re-sending a code is idempotent. If your transmitter is unreliable and commands are occasionally missed, increase `_ON_REPEATS` / `_OFF_REPEATS` in `commands.py`.
