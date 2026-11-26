@@ -24,9 +24,9 @@ This integration sends infrared on/off commands to battery-powered IR tea light 
 
 ## State tracking
 
-IR is a one-way protocol with no feedback channel. The light entity uses **assumed state** -- it tracks what it last sent (restored across restarts), not what the tea lights are actually doing. If a command fails to reach the tea lights (out of range, blocked, etc.), the HA state will be wrong. Because state is assumed, the frontend shows discrete on/off controls rather than a single toggle. The button entities are stateless.
+IR is a one-way protocol with no feedback channel. The light entity uses **assumed state** -- it tracks the last code sent, not what the tea lights are actually doing. That includes codes sent by the Turn on / Turn off buttons, and the state is restored across restarts (even if the transmitter was unavailable when Home Assistant shut down). If a command fails to reach the tea lights (out of range, blocked, etc.), the HA state will be wrong; sending the code again fixes it. Because state is assumed, the frontend shows discrete on/off controls rather than a single toggle.
 
-The entity is built on the `InfraredEmitterConsumerEntity` base class, so it is automatically marked unavailable when the underlying infrared transmitter is unavailable.
+The entities are built on the `InfraredEmitterConsumerEntity` base class, so they are automatically marked unavailable when the underlying infrared transmitter is unavailable. If you rename the transmitter's entity ID, the integration follows it automatically.
 
 ## Installation
 

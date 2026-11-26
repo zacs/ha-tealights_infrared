@@ -33,6 +33,7 @@ class TeaLightsIrConfigFlow(ConfigFlow, domain=DOMAIN):
         if not emitter_entity_ids:
             return self.async_abort(reason="no_emitters")
 
+        errors: dict[str, str] = {}
         if user_input is not None:
             entity_id = user_input[CONF_INFRARED_EMITTER_ENTITY_ID]
             # An emitter entity_id can change; match on it only to prevent an
@@ -40,15 +41,15 @@ class TeaLightsIrConfigFlow(ConfigFlow, domain=DOMAIN):
             self._async_abort_entries_match(
                 {CONF_INFRARED_EMITTER_ENTITY_ID: entity_id}
             )
-
-            ent_reg = er.async_get(self.hass)
-            entry = ent_reg.async_get(entity_id)
-            entity_name = (
-                entry.name or entry.original_name or entity_id if entry else entity_id
-            )
-            return self.async_create_entry(
-                title=f"Tea Lights via {entity_name}", data=user_input
-            )
+            # The selector only offers emitters, but the one picked may have
+            # gone away between showing the form and submitting it.
+            if entity_id not in emitter_entity_ids:
+                errors[CONF_INFRARED_EMITTER_ENTITY_ID] = "emitter_not_found"
+            else:
+                return self.async_create_entry(
+                    title=f"Tea Lights via {self._async_emitter_name(entity_id)}",
+                    data=user_input,
+                )
 
         return self.async_show_form(
             step_id="user",
@@ -62,4 +63,11 @@ class TeaLightsIrConfigFlow(ConfigFlow, domain=DOMAIN):
                     ),
                 }
             ),
+            errors=errors,
         )
+
+    def _async_emitter_name(self, entity_id: str) -> str:
+        """Return a display name for the emitter entity."""
+        if (registry_entry := er.async_get(self.hass).async_get(entity_id)) is None:
+            return entity_id
+        return registry_entry.name or registry_entry.original_name or entity_id

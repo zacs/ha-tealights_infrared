@@ -4,6 +4,9 @@
       "already_configured": "These tea lights have already been configured with this transmitter.",
       "no_emitters": "No infrared transmitter entities found. Please set up an infrared transmitter device first."
     },
+    "error": {
+      "emitter_not_found": "The selected infrared transmitter is no longer available. Please select another one."
+    },
     "step": {
       "user": {
         "data": {
