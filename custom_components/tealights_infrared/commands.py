@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from enum import StrEnum
+from typing import override
 
-from infrared_protocols import Command, Timing
+from homeassistant.components.infrared import InfraredCommand
 
 # Tea light IR protocol timing values (in microseconds).
 # Decoded from captured Tuya Zigbee IR blaster signals (FastLZ-compressed
@@ -28,62 +30,65 @@ _MODULATION_HZ = 38000
 _ON_REPEATS = 1
 _OFF_REPEATS = 2
 
-# Single frame timings for the ON command (one frame, trailing inter-frame gap).
-_ON_FRAME: list[Timing] = [
-    Timing(_S, _S),
-    Timing(_L, _L),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_L, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _L),
-    Timing(_S, _GAP),
-]
+# Single frame of the ON command as (mark, space) pairs, ending with the
+# inter-frame gap.
+_ON_FRAME: tuple[tuple[int, int], ...] = (
+    (_S, _S),
+    (_L, _L),
+    (_S, _S),
+    (_S, _S),
+    (_S, _S),
+    (_S, _S),
+    (_L, _S),
+    (_S, _S),
+    (_S, _S),
+    (_S, _S),
+    (_S, _L),
+    (_S, _GAP),
+)
 
-# Single frame timings for the OFF command (one frame, trailing inter-frame gap).
-_OFF_FRAME: list[Timing] = [
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_S, _S),
-    Timing(_L, _S),
-    Timing(_S, _L),
-    Timing(_L, _S),
-    Timing(_S, _S),
-    Timing(_S, _GAP),
-]
+# Single frame of the OFF command as (mark, space) pairs, ending with the
+# inter-frame gap.
+_OFF_FRAME: tuple[tuple[int, int], ...] = (
+    (_S, _S),
+    (_S, _S),
+    (_S, _S),
+    (_S, _S),
+    (_S, _S),
+    (_S, _S),
+    (_S, _S),
+    (_L, _S),
+    (_S, _L),
+    (_L, _S),
+    (_S, _S),
+    (_S, _GAP),
+)
 
 
-class RawCommand(Command):
-    """IR command built from raw mark/space timings.
+class RawCommand(InfraredCommand):
+    """IR command built from raw (mark, space) pairs.
 
-    infrared_protocols commands bake their repeats directly into the timings
-    returned by ``get_raw_timings`` (the emitter transmits that list once), so
-    this command expands ``repeat_count`` into repeated copies of the frame
-    rather than relying on the emitter to replay it.
+    The infrared platform's emitters transmit the list returned by
+    ``get_raw_timings`` exactly once, as signed microseconds: positive values
+    are marks (carrier on), negative values are spaces (carrier off). Repeats
+    are therefore baked into that list rather than left to the emitter.
     """
 
     def __init__(
         self,
         *,
-        timings: list[Timing],
+        frame: Sequence[tuple[int, int]],
         modulation: int = _MODULATION_HZ,
         repeat_count: int = 0,
     ) -> None:
         """Initialize raw IR command."""
         super().__init__(modulation=modulation, repeat_count=repeat_count)
-        self._timings = timings
+        self._frame = [t for mark, space in frame for t in (mark, -space)]
 
-    def get_raw_timings(self) -> list[Timing]:
+    @override
+    def get_raw_timings(self) -> list[int]:
         """Return the frame timings repeated ``repeat_count`` extra times."""
-        return list(self._timings) * (self.repeat_count + 1)
+        return self._frame * (self.repeat_count + 1)
 
 
 class TeaLightCode(StrEnum):
@@ -93,8 +98,8 @@ class TeaLightCode(StrEnum):
     OFF = "off"
 
 
-def make_command(code: TeaLightCode) -> Command:
+def make_command(code: TeaLightCode) -> InfraredCommand:
     """Create an IR command for a tea light action."""
-    if code == TeaLightCode.ON:
-        return RawCommand(timings=_ON_FRAME, repeat_count=_ON_REPEATS)
-    return RawCommand(timings=_OFF_FRAME, repeat_count=_OFF_REPEATS)
+    if code is TeaLightCode.ON:
+        return RawCommand(frame=_ON_FRAME, repeat_count=_ON_REPEATS)
+    return RawCommand(frame=_OFF_FRAME, repeat_count=_OFF_REPEATS)

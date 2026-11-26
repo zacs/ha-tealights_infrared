@@ -32,3 +32,22 @@ jobs:
           # This integration ships only as a custom repository and is not in
           # the home-assistant/brands repo, so skip the brands check.
           ignore: brands
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: |
+          pip install pytest-homeassistant-custom-component
+          # infrared-protocols is a requirement of HA's infrared integration,
+          # which HA installs at runtime; install the version it pins.
+          pip install "$(python -c 'import json, pathlib, homeassistant; print(json.loads((pathlib.Path(homeassistant.__file__).parent / "components/infrared/manifest.json").read_text())["requirements"][0])')"
+      - name: Run tests
+        run: pytest

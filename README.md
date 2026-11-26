@@ -49,3 +49,12 @@ Copy the `custom_components/tealights_infrared` directory into your Home Assista
 The bundled IR codes were captured from a set of generic battery-powered IR tea light candles. The protocol uses pulse-width modulation at 38kHz with ~850us/~1700us timing. If your tea lights use different codes, you will need to modify `commands.py`.
 
 On and off are discrete codes (not a single toggle), so re-sending a code is idempotent. If your transmitter is unreliable and commands are occasionally missed, increase `_ON_REPEATS` / `_OFF_REPEATS` in `commands.py`.
+
+## Development
+
+Tests run against a real Home Assistant core with a fake infrared emitter, via [pytest-homeassistant-custom-component](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component). They need Python 3.14:
+
+```bash
+pip install pytest-homeassistant-custom-component infrared-protocols
+pytest
+```
