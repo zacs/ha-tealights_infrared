@@ -93,8 +93,7 @@ async def emitter(hass: HomeAssistant) -> AsyncGenerator[FakeEmitter]:
         yield fake
 
 
-@pytest.fixture
-async def tealights_entry(hass: HomeAssistant, emitter: FakeEmitter) -> MockConfigEntry:
+async def async_setup_tealights(hass: HomeAssistant) -> MockConfigEntry:
     """Set up a Tea Lights config entry bound to the fake emitter."""
     entry = MockConfigEntry(
         domain=DOMAIN,
@@ -105,3 +104,9 @@ async def tealights_entry(hass: HomeAssistant, emitter: FakeEmitter) -> MockConf
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     return entry
+
+
+@pytest.fixture
+async def tealights_entry(hass: HomeAssistant, emitter: FakeEmitter) -> MockConfigEntry:
+    """Set up a Tea Lights config entry bound to the fake emitter."""
+    return await async_setup_tealights(hass)
